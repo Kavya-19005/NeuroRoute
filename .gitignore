@@ -1,0 +1,17 @@
+# Dependency/Environment Folders
+venv/
+__pycache__/
+.vscode/
+
+# Compiled Files
+*.pyc
+*.o
+*.so
+
+# Operating System Files
+.DS_Store
+
+# Temporary Files / Output
+*.log
+*.zip
+*.tar.gz

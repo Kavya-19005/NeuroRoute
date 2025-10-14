@@ -1,0 +1,80 @@
+version: '3.7'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      # Set internal and external listeners to the required 9092 port
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 4
+    # CRITICAL FIX: Ensure Kafka waits for Zookeeper before advertising
+    command:
+      [ "sh", "-c", "sleep 15 && /etc/confluent/docker/run" ]
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    hostname: kafka-exporter
+    container_name: kafka-exporter
+    depends_on:
+      - kafka
+    ports:
+      - "9308:9308"
+    environment:
+      # This variable tells the exporter what to monitor, which is correct:
+      KAFKA_EXPORTER_kafka_servers: kafka:9093 
+      KAFKA_EXPORTER_SKIP_COLLECT: 'topic' 
+      KAFKA_EXPORTER_LOG_LEVEL: info
+    
+    # CRITICAL FIX: The command must use the internal hostname (kafka) 
+    # and the correct internal port (9093) to override the default.
+    command:
+      - sh
+      - -c
+      - "sleep 15 && /bin/kafka_exporter --kafka-server=kafka:9093"
+
+  prometheus:
+    image: prom/prometheus
+    hostname: prometheus
+    container_name: prometheus
+    depends_on:
+      - kafka-exporter
+    ports:
+      - "9090:9090" # This is the Prometheus Web UI port
+    # CRITICAL: Mounts the configuration file (we'll create this next)
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+  grafana:
+      image: grafana/grafana
+      container_name: grafana
+      ports:
+        - "3000:3000" # Grafana Web UI
+      environment:
+        - GF_SECURITY_ADMIN_USER=admin
+        - GF_SECURITY_ADMIN_PASSWORD=pass
+        - GF_USERS_ALLOW_SIGN_UP=false
+      depends_on:
+        - prometheus
