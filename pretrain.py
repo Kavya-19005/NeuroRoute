@@ -81,8 +81,11 @@ def execute_pretraining():
     start_scope()
     router = NeuroRouterSNN()
     
-    # 3. Execute the supervised training method (requires a train function in snn_model.py)
-    # NOTE: You MUST add the pretrain_model function to snn_model.py first!
+    #  CRITICAL FIX: Save the clean initial state 
+    # The 'forward' call inside pretrain_model relies on this state being saved.
+    router.net.store('INITIAL_STATE')
+    
+    # 3. Execute the supervised training method
     router.pretrain_model(inputs, labels, epochs=20, learning_rate=0.01)
     
     # 4. Save Pre-trained Weights
