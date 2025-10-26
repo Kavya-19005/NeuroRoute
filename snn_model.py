@@ -12,6 +12,60 @@ def rate_encode(value, min_val, max_val, max_rate=100*Hz):
     return rate
 
 class NeuroRouterSNN:
+
+    def pretrain_model(self, input_data, labels, epochs=20, learning_rate=0.01):
+        """
+        Supervised training phase to initialize weights from a dataset (Imitation Learning).
+        """
+        print(f"Starting Supervised Pre-training for {epochs} epochs...")
+        
+        # Reset weights to a truly neutral state before training
+        self.synapses.w[0] = 0.5
+        self.synapses.w[1] = 0.5
+        
+        num_samples = len(labels)
+        
+        for epoch in range(epochs):
+            total_error = 0
+            
+            for i in range(num_samples):
+                # Get the processed Lag inputs and the correct optimal route (label)
+                lag_A = input_data.iloc[i, 0]
+                lag_B = input_data.iloc[i, 1]
+                target_route = labels.iloc[i]
+                
+                # 1. Forward Pass (Get SNN Decision)
+                # Note: We must ensure we restore the state before each forward pass
+                self.net.restore('INITIAL_STATE')
+                decision, _, _, _ = self.forward(lag_A, lag_B)
+                
+                # 2. Calculate Reward/Error: Reward is 1.0 if the SNN chose the target, else 0.0
+                reward = 1.0 if decision == target_route else 0.0
+                
+                # 3. Apply Supervised Weight Update (Reinforcement for the correct path)
+                
+                # Get the weight corresponding to the correct route (target_route)
+                correct_synapse_index = target_route 
+                current_w = self.synapses.w[correct_synapse_index]
+                
+                # If reward is 1.0 (SNN chose the correct path, or we want to reinforce the correct path),
+                # we push the weight UP toward 1.0.
+                dw = learning_rate * (1.0 - current_w)
+                
+                # Update all weights only for the target route to encourage preference
+                self.synapses.w[correct_synapse_index] = current_w + dw
+                total_error += (1.0 - reward) # Simple error calculation
+
+                # Log the pre-training step
+                if (i + 1) % 1000 == 0:
+                    print(f"  Epoch {epoch+1}: Processed {i+1} samples. Current Error: {total_error / (i+1):.4f}")
+            
+            print(f"Epoch {epoch+1}/{epochs} completed. Avg Error: {total_error / num_samples:.4f}")
+            
+        print("Pre-training complete. Weights are now initialized.")
+        print(f"Final Pre-trained Weights: W0={self.synapses.w[0]:.4f}, W1={self.synapses.w[1]:.4f}")
+
+
     def __init__(self, simulation_time=50*ms):
         self.simulation_time = simulation_time
         defaultclock.dt = 0.1*ms
