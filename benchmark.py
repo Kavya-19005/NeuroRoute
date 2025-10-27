@@ -5,9 +5,12 @@ import time
 import json
 import csv
 import random
+# --- Add necessary numpy import for loading weights ---
+import numpy as np 
+
 from brian2 import start_scope, second
 # We no longer connect to Kafka, so we remove the KafkaProducer import
-# and replace it with a simple print, ensuring the core logic remains.
+# and replace it with a mock producer function call (removed KafkaProducer import)
 
 # --- Import Routers and SNN (The Brain) ---
 from snn_model import NeuroRouterSNN 
@@ -17,6 +20,7 @@ from baseline_router import RoundRobinRouter, BASELINE_PARTITIONS
 # --- Configuration ---
 TRIAL_MESSAGES = 100 
 OUTPUT_CSV_FILE = 'neuro_route_metrics.csv' 
+PRETRAINED_WEIGHTS_FILE = 'pretrained_weights.npz' # File saved by pretrain.py
 
 # --- OFFLINE MOCK FUNCTION: GUARANTEES CHAOS INPUT ---
 def get_guaranteed_metrics(chosen_partition):
@@ -39,6 +43,16 @@ def run_single_trial(router_type='neuroroute', csv_writer=None, trial_num=1):
     # Choose Router Implementation
     if router_type == 'neuroroute':
         router = NeuroRouterSNN()
+        
+        # VVVV LOAD PRE-TRAINED WEIGHTS VVVV
+        try:
+            weights_data = np.load(PRETRAINED_WEIGHTS_FILE)
+            router.synapses.w[0] = weights_data['W0']
+            router.synapses.w[1] = weights_data['W1']
+            print(f"Loaded pre-trained weights: W0={weights_data['W0']:.4f}, W1={weights_data['W1']:.4f}")
+        except FileNotFoundError:
+            print("WARNING: Pre-trained weights file not found. Using default 0.5 weights.")
+        
         router.net.store('INITIAL_STATE')
         is_learning = True
     else: 
@@ -118,8 +132,6 @@ def run_benchmark():
 
         # 1. Run Round-Robin Baseline (Trial 1)
         rr_reward = run_single_trial(router_type='round_robin', csv_writer=csv_writer, trial_num=1)
-        
-        # NOTE: No Kafka wait needed as there is no live connection
         
         # 2. Run NeuroRoute (Trial 2)
         nr_reward = run_single_trial(router_type='neuroroute', csv_writer=csv_writer, trial_num=2)
