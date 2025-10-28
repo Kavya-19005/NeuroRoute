@@ -1,3 +1,4 @@
+[PLEASE READ THE ENTIRE README BEFORE EXECUTION, THANK YOU]
 **=== NeuroRoute: Brain-Inspired Adaptive Data Routing ===**
 
 NeuroRoute is an innovative big data infrastructure project that uses a Spiking Neural Network (SNN) to intelligently route data streams. It replaces static, failure-prone routing rules with a system that learns and 
@@ -29,3 +30,11 @@ B. Execution Steps
   - Run Pre-training: (Necessary only once to create the weights file) [python pretrain.py]
   - Run Validation: Execute the final benchmark script. This executes the full Offline Chaos Test and generates the final data. [python benchmark.py]
   - Analyze Results: The final data is saved to neuro_route_metrics.csv. Use RStudio to load this file and generate the Comparative Lag and Weight Convergence plots to visualize the 10.55% efficiency improvement.
+
+PLEASE IGNORE THE FOLLOWING FILES:
+docker-compose.yml
+prometheus.yml
+metrics_scraper.py
+router_proxy.py
+chaos_consumer.py
+
