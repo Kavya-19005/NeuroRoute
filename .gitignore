@@ -15,3 +15,11 @@ __pycache__/
 *.log
 *.zip
 *.tar.gz
+
+prometheus.yml
+router_proxy.py
+metrics_scraper.py
+main_test.py
+docker-compose.yml
+chaos_consumer.py
+baseline_router.py
