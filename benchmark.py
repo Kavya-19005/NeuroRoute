@@ -9,13 +9,12 @@ import random
 import numpy as np 
 
 from brian2 import start_scope, second
-# We no longer connect to Kafka, so we remove the KafkaProducer import
-# and replace it with a mock producer function call (removed KafkaProducer import)
+
 
 # --- Import Routers and SNN (The Brain) ---
 from snn_model import NeuroRouterSNN 
 from baseline_router import RoundRobinRouter, BASELINE_PARTITIONS
-# We remove the metrics_scraper import and replace it with a mock function
+
 
 # --- Configuration ---
 TRIAL_MESSAGES = 100 

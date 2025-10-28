@@ -1,6 +1,6 @@
 
 # 1. Setup: Install Packages (if needed)
-install.packages(c("readr", "ggplot2", "dplyr"))
+#install.packages(c("readr", "ggplot2", "dplyr"))
 
 # 2. Load Libraries
 library(readr)
