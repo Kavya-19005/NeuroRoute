@@ -11,7 +11,7 @@ __pycache__/
 # Operating System Files
 .DS_Store
 
-# Temporary Files / Output
+# Temporary Files / Output 
 *.log
 *.zip
 *.tar.gz
