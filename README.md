@@ -5,6 +5,11 @@
 NeuroRoute is an innovative big data infrastructure project that uses a Spiking Neural Network (SNN) to intelligently route data streams. It replaces static, failure-prone routing rules with a system that learns and 
 adapts in real-time to avoid congestion, much like the human brain redirects impulses around damaged areas.
 
+**Dataset used:** 
+
+Midterm_53_group.csv
+https://www.kaggle.com/datasets/ravikumargattu/network-traffic-dataset?select=output1.csv
+
 **1. Key Project Achievements :**
   - Adaptive Routing: Implements a closed-loop Reinforcement Learning (RL) system that dynamically adjusts traffic based on measured latency and lag.
   - Dual-Phase Learning: Combines Supervised Pre-training (using a real network dataset) with Online RL for immediate, intelligent deployment.
