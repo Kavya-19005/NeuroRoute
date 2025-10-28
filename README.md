@@ -33,9 +33,14 @@ B. Execution Steps
   - Analyze Results: The final data is saved to neuro_route_metrics.csv. Use RStudio to load this file and generate the Comparative Lag and Weight Convergence plots to visualize the 10.55% efficiency improvement.
 
 PLEASE IGNORE THE FOLLOWING FILES:
-docker-compose.yml
-prometheus.yml
-metrics_scraper.py
-router_proxy.py
-chaos_consumer.py
+
+- docker-compose.yml
+
+- prometheus.yml
+
+- metrics_scraper.py
+
+- router_proxy.py
+
+- chaos_consumer.py
 
